@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789412458891,
+      "tag": "0000_oxigenoterapia_core_schema",
+      "breakpoints": true
+    }
+  ]
 }
