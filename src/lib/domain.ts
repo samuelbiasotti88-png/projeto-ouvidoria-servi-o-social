@@ -158,8 +158,9 @@ function csvEscape(value: unknown): string {
 }
 
 export function downloadCSV(filename: string, rows: Record<string, unknown>[]) {
-  if (rows.length === 0) return;
-  const headers = Object.keys(rows[0]);
+  const first = rows[0];
+  if (!first) return;
+  const headers = Object.keys(first);
   const body = [
     headers.map(csvEscape).join(";"),
     ...rows.map((row) => headers.map((h) => csvEscape(row[h])).join(";")),
