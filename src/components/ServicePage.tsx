@@ -142,7 +142,7 @@ export function ServicePage({
 
       let savedId = form.id;
       if (form.id) {
-        const { error } = await supabase.from(kind).update(payload).eq("id", form.id);
+        const { error } = await supabase.from(kind).update(payload as never).eq("id", form.id);
         if (error) throw error;
       } else {
         const { data, error } = await supabase.from(kind).insert(payload as never).select("id").single();
