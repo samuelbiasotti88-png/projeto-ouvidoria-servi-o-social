@@ -11,6 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ImplantacoesRouteImport } from './routes/implantacoes'
+import { Route as RecargasRouteImport } from './routes/recargas'
+import { Route as RetiradasRouteImport } from './routes/retiradas'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +25,58 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImplantacoesRoute = ImplantacoesRouteImport.update({
+  id: '/implantacoes',
+  path: '/implantacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecargasRoute = RecargasRouteImport.update({
+  id: '/recargas',
+  path: '/recargas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RetiradasRoute = RetiradasRouteImport.update({
+  id: '/retiradas',
+  path: '/retiradas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/implantacoes': typeof ImplantacoesRoute
+  '/recargas': typeof RecargasRoute
+  '/retiradas': typeof RetiradasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/implantacoes': typeof ImplantacoesRoute
+  '/recargas': typeof RecargasRoute
+  '/retiradas': typeof RetiradasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/implantacoes': typeof ImplantacoesRoute
+  '/recargas': typeof RecargasRoute
+  '/retiradas': typeof RetiradasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth'
+  fullPaths: '/' | '/auth' | '/implantacoes' | '/recargas' | '/retiradas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth'
-  id: '__root__' | '/' | '/auth'
+  to: '/' | '/auth' | '/implantacoes' | '/recargas' | '/retiradas'
+  id: '__root__' | '/' | '/auth' | '/implantacoes' | '/recargas' | '/retiradas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  ImplantacoesRoute: typeof ImplantacoesRoute
+  RecargasRoute: typeof RecargasRoute
+  RetiradasRoute: typeof RetiradasRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +95,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/implantacoes': {
+      id: '/implantacoes'
+      path: '/implantacoes'
+      fullPath: '/implantacoes'
+      preLoaderRoute: typeof ImplantacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recargas': {
+      id: '/recargas'
+      path: '/recargas'
+      fullPath: '/recargas'
+      preLoaderRoute: typeof RecargasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/retiradas': {
+      id: '/retiradas'
+      path: '/retiradas'
+      fullPath: '/retiradas'
+      preLoaderRoute: typeof RetiradasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  ImplantacoesRoute: ImplantacoesRoute,
+  RecargasRoute: RecargasRoute,
+  RetiradasRoute: RetiradasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
