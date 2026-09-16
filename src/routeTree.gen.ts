@@ -11,6 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ImplantacoesRouteImport } from './routes/implantacoes'
+import { Route as PacientesRouteImport } from './routes/pacientes'
+import { Route as RecargasRouteImport } from './routes/recargas'
+import { Route as RetiradasRouteImport } from './routes/retiradas'
+import { Route as PacientesIdRouteImport } from './routes/pacientes.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +27,97 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImplantacoesRoute = ImplantacoesRouteImport.update({
+  id: '/implantacoes',
+  path: '/implantacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PacientesRoute = PacientesRouteImport.update({
+  id: '/pacientes',
+  path: '/pacientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecargasRoute = RecargasRouteImport.update({
+  id: '/recargas',
+  path: '/recargas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RetiradasRoute = RetiradasRouteImport.update({
+  id: '/retiradas',
+  path: '/retiradas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PacientesIdRoute = PacientesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PacientesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/implantacoes': typeof ImplantacoesRoute
+  '/pacientes': typeof PacientesRouteWithChildren
+  '/recargas': typeof RecargasRoute
+  '/retiradas': typeof RetiradasRoute
+  '/pacientes/$id': typeof PacientesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/implantacoes': typeof ImplantacoesRoute
+  '/pacientes': typeof PacientesRouteWithChildren
+  '/recargas': typeof RecargasRoute
+  '/retiradas': typeof RetiradasRoute
+  '/pacientes/$id': typeof PacientesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/implantacoes': typeof ImplantacoesRoute
+  '/pacientes': typeof PacientesRouteWithChildren
+  '/recargas': typeof RecargasRoute
+  '/retiradas': typeof RetiradasRoute
+  '/pacientes/$id': typeof PacientesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/implantacoes'
+    | '/pacientes'
+    | '/recargas'
+    | '/retiradas'
+    | '/pacientes/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth'
-  id: '__root__' | '/' | '/auth'
+  to:
+    | '/'
+    | '/auth'
+    | '/implantacoes'
+    | '/pacientes'
+    | '/recargas'
+    | '/retiradas'
+    | '/pacientes/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/implantacoes'
+    | '/pacientes'
+    | '/recargas'
+    | '/retiradas'
+    | '/pacientes/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  ImplantacoesRoute: typeof ImplantacoesRoute
+  PacientesRoute: typeof PacientesRouteWithChildren
+  RecargasRoute: typeof RecargasRoute
+  RetiradasRoute: typeof RetiradasRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +136,63 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/implantacoes': {
+      id: '/implantacoes'
+      path: '/implantacoes'
+      fullPath: '/implantacoes'
+      preLoaderRoute: typeof ImplantacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pacientes': {
+      id: '/pacientes'
+      path: '/pacientes'
+      fullPath: '/pacientes'
+      preLoaderRoute: typeof PacientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recargas': {
+      id: '/recargas'
+      path: '/recargas'
+      fullPath: '/recargas'
+      preLoaderRoute: typeof RecargasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/retiradas': {
+      id: '/retiradas'
+      path: '/retiradas'
+      fullPath: '/retiradas'
+      preLoaderRoute: typeof RetiradasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pacientes/$id': {
+      id: '/pacientes/$id'
+      path: '/$id'
+      fullPath: '/pacientes/$id'
+      preLoaderRoute: typeof PacientesIdRouteImport
+      parentRoute: typeof PacientesRoute
+    }
   }
 }
+
+interface PacientesRouteChildren {
+  PacientesIdRoute: typeof PacientesIdRoute
+}
+
+const PacientesRouteChildren: PacientesRouteChildren = {
+  PacientesIdRoute: PacientesIdRoute,
+}
+
+const PacientesRouteWithChildren = PacientesRoute._addFileChildren(
+  PacientesRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  ImplantacoesRoute: ImplantacoesRoute,
+  PacientesRoute: PacientesRouteWithChildren,
+  RecargasRoute: RecargasRoute,
+  RetiradasRoute: RetiradasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
