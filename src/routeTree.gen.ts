@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as EquipamentosRouteImport } from './routes/equipamentos'
 import { Route as ImplantacoesRouteImport } from './routes/implantacoes'
 import { Route as PacientesRouteImport } from './routes/pacientes'
 import { Route as RecargasRouteImport } from './routes/recargas'
@@ -22,9 +24,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgendaRoute = AgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipamentosRoute = EquipamentosRouteImport.update({
+  id: '/equipamentos',
+  path: '/equipamentos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImplantacoesRoute = ImplantacoesRouteImport.update({
@@ -55,7 +67,9 @@ const PacientesIdRoute = PacientesIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
   '/auth': typeof AuthRoute
+  '/equipamentos': typeof EquipamentosRoute
   '/implantacoes': typeof ImplantacoesRoute
   '/pacientes': typeof PacientesRouteWithChildren
   '/recargas': typeof RecargasRoute
@@ -64,7 +78,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
   '/auth': typeof AuthRoute
+  '/equipamentos': typeof EquipamentosRoute
   '/implantacoes': typeof ImplantacoesRoute
   '/pacientes': typeof PacientesRouteWithChildren
   '/recargas': typeof RecargasRoute
@@ -74,7 +90,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
   '/auth': typeof AuthRoute
+  '/equipamentos': typeof EquipamentosRoute
   '/implantacoes': typeof ImplantacoesRoute
   '/pacientes': typeof PacientesRouteWithChildren
   '/recargas': typeof RecargasRoute
@@ -85,7 +103,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/agenda'
     | '/auth'
+    | '/equipamentos'
     | '/implantacoes'
     | '/pacientes'
     | '/recargas'
@@ -94,7 +114,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/agenda'
     | '/auth'
+    | '/equipamentos'
     | '/implantacoes'
     | '/pacientes'
     | '/recargas'
@@ -103,7 +125,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/agenda'
     | '/auth'
+    | '/equipamentos'
     | '/implantacoes'
     | '/pacientes'
     | '/recargas'
@@ -113,7 +137,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgendaRoute: typeof AgendaRoute
   AuthRoute: typeof AuthRoute
+  EquipamentosRoute: typeof EquipamentosRoute
   ImplantacoesRoute: typeof ImplantacoesRoute
   PacientesRoute: typeof PacientesRouteWithChildren
   RecargasRoute: typeof RecargasRoute
@@ -129,11 +155,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agenda': {
+      id: '/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AgendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipamentos': {
+      id: '/equipamentos'
+      path: '/equipamentos'
+      fullPath: '/equipamentos'
+      preLoaderRoute: typeof EquipamentosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/implantacoes': {
@@ -188,7 +228,9 @@ const PacientesRouteWithChildren = PacientesRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgendaRoute: AgendaRoute,
   AuthRoute: AuthRoute,
+  EquipamentosRoute: EquipamentosRoute,
   ImplantacoesRoute: ImplantacoesRoute,
   PacientesRoute: PacientesRouteWithChildren,
   RecargasRoute: RecargasRoute,
