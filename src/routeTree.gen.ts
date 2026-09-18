@@ -12,9 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DocumentosRouteImport } from './routes/documentos'
 import { Route as EquipamentosRouteImport } from './routes/equipamentos'
 import { Route as ImplantacoesRouteImport } from './routes/implantacoes'
+import { Route as IndicadoresRouteImport } from './routes/indicadores'
 import { Route as PacientesRouteImport } from './routes/pacientes'
+import { Route as PendenciasRouteImport } from './routes/pendencias'
 import { Route as RecargasRouteImport } from './routes/recargas'
 import { Route as RetiradasRouteImport } from './routes/retiradas'
 import { Route as PacientesIdRouteImport } from './routes/pacientes.$id'
@@ -34,6 +37,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentosRoute = DocumentosRouteImport.update({
+  id: '/documentos',
+  path: '/documentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EquipamentosRoute = EquipamentosRouteImport.update({
   id: '/equipamentos',
   path: '/equipamentos',
@@ -44,9 +52,19 @@ const ImplantacoesRoute = ImplantacoesRouteImport.update({
   path: '/implantacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndicadoresRoute = IndicadoresRouteImport.update({
+  id: '/indicadores',
+  path: '/indicadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PacientesRoute = PacientesRouteImport.update({
   id: '/pacientes',
   path: '/pacientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PendenciasRoute = PendenciasRouteImport.update({
+  id: '/pendencias',
+  path: '/pendencias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecargasRoute = RecargasRouteImport.update({
@@ -69,9 +87,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/auth': typeof AuthRoute
+  '/documentos': typeof DocumentosRoute
   '/equipamentos': typeof EquipamentosRoute
   '/implantacoes': typeof ImplantacoesRoute
+  '/indicadores': typeof IndicadoresRoute
   '/pacientes': typeof PacientesRouteWithChildren
+  '/pendencias': typeof PendenciasRoute
   '/recargas': typeof RecargasRoute
   '/retiradas': typeof RetiradasRoute
   '/pacientes/$id': typeof PacientesIdRoute
@@ -80,9 +101,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/auth': typeof AuthRoute
+  '/documentos': typeof DocumentosRoute
   '/equipamentos': typeof EquipamentosRoute
   '/implantacoes': typeof ImplantacoesRoute
+  '/indicadores': typeof IndicadoresRoute
   '/pacientes': typeof PacientesRouteWithChildren
+  '/pendencias': typeof PendenciasRoute
   '/recargas': typeof RecargasRoute
   '/retiradas': typeof RetiradasRoute
   '/pacientes/$id': typeof PacientesIdRoute
@@ -92,9 +116,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/auth': typeof AuthRoute
+  '/documentos': typeof DocumentosRoute
   '/equipamentos': typeof EquipamentosRoute
   '/implantacoes': typeof ImplantacoesRoute
+  '/indicadores': typeof IndicadoresRoute
   '/pacientes': typeof PacientesRouteWithChildren
+  '/pendencias': typeof PendenciasRoute
   '/recargas': typeof RecargasRoute
   '/retiradas': typeof RetiradasRoute
   '/pacientes/$id': typeof PacientesIdRoute
@@ -105,9 +132,12 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/auth'
+    | '/documentos'
     | '/equipamentos'
     | '/implantacoes'
+    | '/indicadores'
     | '/pacientes'
+    | '/pendencias'
     | '/recargas'
     | '/retiradas'
     | '/pacientes/$id'
@@ -116,9 +146,12 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/auth'
+    | '/documentos'
     | '/equipamentos'
     | '/implantacoes'
+    | '/indicadores'
     | '/pacientes'
+    | '/pendencias'
     | '/recargas'
     | '/retiradas'
     | '/pacientes/$id'
@@ -127,9 +160,12 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/auth'
+    | '/documentos'
     | '/equipamentos'
     | '/implantacoes'
+    | '/indicadores'
     | '/pacientes'
+    | '/pendencias'
     | '/recargas'
     | '/retiradas'
     | '/pacientes/$id'
@@ -139,9 +175,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgendaRoute: typeof AgendaRoute
   AuthRoute: typeof AuthRoute
+  DocumentosRoute: typeof DocumentosRoute
   EquipamentosRoute: typeof EquipamentosRoute
   ImplantacoesRoute: typeof ImplantacoesRoute
+  IndicadoresRoute: typeof IndicadoresRoute
   PacientesRoute: typeof PacientesRouteWithChildren
+  PendenciasRoute: typeof PendenciasRoute
   RecargasRoute: typeof RecargasRoute
   RetiradasRoute: typeof RetiradasRoute
 }
@@ -169,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/documentos': {
+      id: '/documentos'
+      path: '/documentos'
+      fullPath: '/documentos'
+      preLoaderRoute: typeof DocumentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/equipamentos': {
       id: '/equipamentos'
       path: '/equipamentos'
@@ -183,11 +229,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImplantacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/indicadores': {
+      id: '/indicadores'
+      path: '/indicadores'
+      fullPath: '/indicadores'
+      preLoaderRoute: typeof IndicadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pacientes': {
       id: '/pacientes'
       path: '/pacientes'
       fullPath: '/pacientes'
       preLoaderRoute: typeof PacientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pendencias': {
+      id: '/pendencias'
+      path: '/pendencias'
+      fullPath: '/pendencias'
+      preLoaderRoute: typeof PendenciasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recargas': {
@@ -230,9 +290,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgendaRoute: AgendaRoute,
   AuthRoute: AuthRoute,
+  DocumentosRoute: DocumentosRoute,
   EquipamentosRoute: EquipamentosRoute,
   ImplantacoesRoute: ImplantacoesRoute,
+  IndicadoresRoute: IndicadoresRoute,
   PacientesRoute: PacientesRouteWithChildren,
+  PendenciasRoute: PendenciasRoute,
   RecargasRoute: RecargasRoute,
   RetiradasRoute: RetiradasRoute,
 }
