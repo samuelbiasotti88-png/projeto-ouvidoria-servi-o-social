@@ -1,24 +1,31 @@
-# Projeto Ouvidoria-Serviço Social
+# Gestão de Oxigenoterapia Domiciliar — Botucatu
 
-Implement exactly the screenshot and nothing else
+Aplicação de gestão para a Secretaria Municipal de Saúde de Botucatu, preparada para execução independente com TanStack Start, Nitro, Bun e Supabase.
 
-This project was built with [Lovable](https://lovable.dev).
+## Requisitos
 
-## Build with Lovable
+- Bun
+- Projeto Supabase configurado com as migrações deste repositório
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/6c075185-e563-48b1-8c8a-d756b7a1e442).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Desenvolvimento local
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+bun install
+cp .env.example .env
+bun run dev
 ```
+
+Preencha `.env` com a URL e a chave **publicável** do projeto Supabase. Chaves secretas ou de serviço nunca devem ser colocadas no navegador, no Git ou em variáveis com prefixo `VITE_`.
+
+## Build e execução
+
+```sh
+bun run build
+bun start
+```
+
+O build usa Nitro com saída para servidor Node compatível com Bun. No serviço Railway, configure as quatro variáveis de `.env.example`: as variáveis `VITE_*` precisam estar disponíveis durante o build para o cliente web conectar ao Supabase. Configure também a URL pública do app e os redirecionamentos de autenticação no Supabase.
+
+## Acesso e dados
+
+Os dados reais de pacientes só devem ser carregados após autorização institucional, revisão das políticas de acesso e validação do fluxo de autenticação. Não importe dados de demonstração em produção.

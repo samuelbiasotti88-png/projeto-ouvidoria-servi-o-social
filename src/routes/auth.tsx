@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/auth")({
@@ -63,18 +62,6 @@ function AuthPage() {
     } finally {
       setBusy(false);
     }
-  }
-
-  async function handleGoogle() {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      toast.error("Não foi possível entrar com o Google.");
-      return;
-    }
-    if (result.redirected) return;
-    void navigate({ to: "/" });
   }
 
   return (
@@ -142,14 +129,6 @@ function AuthPage() {
             {mode === "entrar" ? "Entrar" : "Criar acesso"}
           </button>
         </form>
-
-        <button
-          type="button"
-          onClick={() => void handleGoogle()}
-          className="mt-3 w-full rounded-xl border bg-background/60 py-2.5 text-sm font-semibold transition-colors hover:bg-background"
-        >
-          Continuar com o Google
-        </button>
 
         <button
           type="button"
