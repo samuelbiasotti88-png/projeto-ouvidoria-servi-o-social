@@ -1,6 +1,8 @@
 name: Verify build
 
 on:
+  push:
+    branches: [migration/independent-hosting]
   pull_request:
     branches: [main]
 
