@@ -1,24 +1,32 @@
-# Projeto Ouvidoria-Serviço Social
+# Gestão de Oxigenoterapia Domiciliar — Botucatu
 
-Implement exactly the screenshot and nothing else
+Aplicação de gestão para a Secretaria Municipal de Saúde de Botucatu. O código é preparado para execução independente em Node.js, com Supabase como banco e autenticação.
 
-This project was built with [Lovable](https://lovable.dev).
+## Requisitos
 
-## Build with Lovable
+- Node.js 22 ou superior
+- pnpm
+- Projeto Supabase configurado com as migrações deste repositório
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/6c075185-e563-48b1-8c8a-d756b7a1e442).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Desenvolvimento
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+pnpm install
+cp .env.example .env
+pnpm dev
 ```
+
+Preencha `.env` com a URL e a chave publicável do projeto Supabase autorizado. Nunca coloque chaves secretas ou de serviço no navegador, no Git ou em variáveis com prefixo `VITE_`.
+
+## Build e execução
+
+```sh
+pnpm build
+pnpm start
+```
+
+O build usa TanStack Start e Nitro com saída para servidor Node. Na Railway, configure `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` no ambiente do serviço. A URL pública do app e os redirecionamentos de autenticação do Supabase também precisam ser configurados.
+
+## Acesso e dados
+
+Os dados reais de pacientes só devem ser carregados após autorização institucional, revisão das políticas de acesso e validação do fluxo de autenticação. Não importe dados de demonstração em produção.
