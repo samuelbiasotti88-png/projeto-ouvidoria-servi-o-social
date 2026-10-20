@@ -1,6 +1,6 @@
 # Gestão de Oxigenoterapia Domiciliar — Botucatu
 
-Aplicação de gestão para a Secretaria Municipal de Saúde de Botucatu, preparada para executar fora do Lovable com TanStack Start, Nitro, Bun e Supabase.
+Aplicação de gestão para a Secretaria Municipal de Saúde de Botucatu, preparada para execução independente com TanStack Start, Nitro, Bun e Supabase.
 
 ## Requisitos
 
