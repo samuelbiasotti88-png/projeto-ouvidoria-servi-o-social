@@ -1,31 +1,30 @@
 # Gestão de Oxigenoterapia Domiciliar — Botucatu
 
-Aplicação de gestão para a Secretaria Municipal de Saúde de Botucatu. O código é preparado para execução independente em Node.js, com Supabase como banco e autenticação.
+Aplicação de gestão para a Secretaria Municipal de Saúde de Botucatu, preparada para executar fora do Lovable com TanStack Start, Nitro, Bun e Supabase.
 
 ## Requisitos
 
-- Node.js 22 ou superior
-- pnpm
+- Bun
 - Projeto Supabase configurado com as migrações deste repositório
 
-## Desenvolvimento
+## Desenvolvimento local
 
 ```sh
-pnpm install
+bun install
 cp .env.example .env
-pnpm dev
+bun run dev
 ```
 
-Preencha `.env` com a URL e a chave publicável do projeto Supabase autorizado. Nunca coloque chaves secretas ou de serviço no navegador, no Git ou em variáveis com prefixo `VITE_`.
+Preencha `.env` com a URL e a chave **publicável** do projeto Supabase. Chaves secretas ou de serviço nunca devem ser colocadas no navegador, no Git ou em variáveis com prefixo `VITE_`.
 
 ## Build e execução
 
 ```sh
-pnpm build
-pnpm start
+bun run build
+bun start
 ```
 
-O build usa TanStack Start e Nitro com saída para servidor Node. Na Railway, configure `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` no ambiente do serviço. A URL pública do app e os redirecionamentos de autenticação do Supabase também precisam ser configurados.
+O build usa Nitro com saída para servidor Node compatível com Bun. No serviço Railway, configure as quatro variáveis de `.env.example`: as variáveis `VITE_*` precisam estar disponíveis durante o build para o cliente web conectar ao Supabase. Configure também a URL pública do app e os redirecionamentos de autenticação no Supabase.
 
 ## Acesso e dados
 
