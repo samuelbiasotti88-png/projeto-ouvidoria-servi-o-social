@@ -23,11 +23,15 @@ export function GlobalSearch({
   const [term, setTerm] = useState("");
   const navigate = useNavigate();
 
-  const { data: patients = [] } = useQuery({
+  const {
+    data: patients = [],
+    isFetching: fetchingPatients,
+    isError: patientsError,
+  } = useQuery({
     queryKey: ["busca-pacientes", term],
     enabled: open && term.trim().length >= 2,
     queryFn: async () => {
-      const like = `%${term.trim()}%`;
+      const like = `%${term.trim().replace(/[,%()\\]/g, " ")}%`;
       const { data, error } = await supabase
         .from("patients")
         .select("id, nome, cpf, cartao_sus, status, numero_equipamento, bairro, telefone")
@@ -40,11 +44,15 @@ export function GlobalSearch({
     },
   });
 
-  const { data: refills = [] } = useQuery({
+  const {
+    data: refills = [],
+    isFetching: fetchingRefills,
+    isError: refillsError,
+  } = useQuery({
     queryKey: ["busca-recargas", term],
     enabled: open && term.trim().length >= 2,
     queryFn: async () => {
-      const like = `%${term.trim()}%`;
+      const like = `%${term.trim().replace(/[,%()\\]/g, " ")}%`;
       const { data, error } = await supabase
         .from("refills")
         .select("id, paciente_id, numero_nota, numero_pedido, numero_os")
@@ -63,7 +71,15 @@ export function GlobalSearch({
         onValueChange={setTerm}
       />
       <CommandList>
-        <CommandEmpty>Digite ao menos 2 caracteres para pesquisar.</CommandEmpty>
+        <CommandEmpty>
+          {term.trim().length < 2
+            ? "Digite ao menos 2 caracteres para pesquisar."
+            : fetchingPatients || fetchingRefills
+              ? "Pesquisando…"
+              : patientsError || refillsError
+                ? "Não foi possível pesquisar. Verifique sua conexão e tente novamente."
+                : "Nenhum registro encontrado."}
+        </CommandEmpty>
         {patients.length > 0 ? (
           <CommandGroup heading="Pacientes">
             {patients.map((p) => (

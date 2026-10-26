@@ -11,8 +11,7 @@ export const Route = createFileRoute("/auth")({
       { title: "Acesso restrito — Oxigenoterapia Domiciliar Botucatu" },
       {
         name: "description",
-        content:
-          "Área de acesso para servidores da Secretaria Municipal de Saúde de Botucatu-SP.",
+        content: "Área de acesso para servidores da Secretaria Municipal de Saúde de Botucatu-SP.",
       },
       { property: "og:title", content: "Acesso restrito — Oxigenoterapia Domiciliar" },
       {
@@ -65,20 +64,44 @@ function AuthPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
-      <div className="glass-panel w-full max-w-md p-8">
+    <main className="grid min-h-dvh items-center bg-[#f4f6f9] px-4 py-10 lg:grid-cols-2 lg:gap-16 lg:px-[8vw]">
+      <section className="mb-8 hidden max-w-xl lg:block">
+        <p className="text-xs font-semibold tracking-[0.2em] text-primary uppercase">
+          Secretaria Municipal de Saúde · Botucatu
+        </p>
+        <h1 className="mt-5 text-5xl font-semibold leading-tight text-[#123355]">
+          Cuidado contínuo.
+          <br />
+          Gestão organizada.
+        </h1>
+        <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">
+          Pacientes, equipamentos e serviços de oxigenoterapia domiciliar em um ambiente de trabalho
+          centralizado.
+        </p>
+        <div className="mt-8 inline-flex items-center gap-3 rounded-lg border bg-white px-4 py-3 text-sm">
+          <span className="size-2 rounded-full bg-emerald-600" />
+          Acesso restrito à equipe autorizada
+        </div>
+      </section>
+      <div className="glass-panel mx-auto w-full max-w-md p-6 sm:p-8">
         <div className="mb-6 flex items-center gap-3">
-          <div className="grid size-11 place-items-center rounded-xl bg-primary text-primary-foreground shadow-[var(--shadow-brand)]">
+          <div className="grid size-11 place-items-center rounded-xl bg-[#123355] text-primary-foreground">
             <span className="font-display text-lg font-bold">O₂</span>
           </div>
           <div>
-            <h1 className="font-display text-lg font-bold">Gestão de Oxigenoterapia Domiciliar</h1>
-            <p className="text-xs text-muted-foreground">
-              Secretaria Municipal de Saúde — Botucatu-SP
-            </p>
+            <h1 className="font-display text-lg font-bold">Vital Air</h1>
+            <p className="text-xs text-muted-foreground">Gestão de oxigenoterapia domiciliar</p>
           </div>
         </div>
 
+        <h2 className="mb-1 text-xl font-semibold">
+          {mode === "entrar" ? "Acesse sua conta" : "Primeiro acesso"}
+        </h2>
+        <p className="mb-6 text-sm text-muted-foreground">
+          {mode === "entrar"
+            ? "Informe seus dados para abrir o painel."
+            : "Cadastro disponível somente para e-mails autorizados."}
+        </p>
         <form onSubmit={handleSubmit} className="space-y-3">
           {mode === "criar" ? (
             <div>
@@ -101,6 +124,7 @@ function AuthPage() {
             <input
               id="email"
               type="email"
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -114,6 +138,7 @@ function AuthPage() {
             <input
               id="senha"
               type="password"
+              autoComplete={mode === "entrar" ? "current-password" : "new-password"}
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
@@ -124,9 +149,9 @@ function AuthPage() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-brand)] transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground  transition-opacity hover:opacity-90 disabled:opacity-60"
           >
-            {mode === "entrar" ? "Entrar" : "Criar acesso"}
+            {busy ? "Aguarde…" : mode === "entrar" ? "Entrar no sistema" : "Criar acesso"}
           </button>
         </form>
 
@@ -139,8 +164,7 @@ function AuthPage() {
         </button>
 
         <p className="mt-6 text-center text-[11px] text-muted-foreground">
-          Uso exclusivo de servidores autorizados. Todos os acessos e alterações são registrados
-          para auditoria (LGPD).
+          Ambiente de homologação · Uso exclusivo da equipe autorizada.
         </p>
       </div>
     </main>
