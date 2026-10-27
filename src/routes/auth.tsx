@@ -29,6 +29,8 @@ function AuthPage() {
   const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const { session } = useAuth();
   const navigate = useNavigate();
 
@@ -38,15 +40,19 @@ function AuthPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    setLoginError(null);
     setBusy(true);
     try {
       if (mode === "entrar") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password: senha,
+        });
         if (error) throw error;
         toast.success("Acesso liberado.");
       } else {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: email.trim().toLowerCase(),
           password: senha,
           options: {
             data: { nome },
@@ -57,7 +63,17 @@ function AuthPage() {
         toast.success("Cadastro enviado. Confirme o e-mail para acessar.");
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Não foi possível concluir.");
+      const code = error && typeof error === "object" && "code" in error ? String(error.code) : "";
+      const message =
+        code === "invalid_credentials"
+          ? "E-mail ou senha incorretos. Confira os dados e use a opção Mostrar senha."
+          : code === "email_not_confirmed"
+            ? "Confirme seu e-mail antes de entrar."
+            : code === "over_request_rate_limit"
+              ? "Muitas tentativas. Aguarde um pouco antes de tentar novamente."
+              : "Não foi possível concluir o acesso. Verifique sua conexão e tente novamente.";
+      setLoginError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }
@@ -119,14 +135,17 @@ function AuthPage() {
           ) : null}
           <div>
             <label className="text-xs font-semibold text-muted-foreground" htmlFor="email">
-              E-mail institucional
+              E-mail de acesso
             </label>
             <input
               id="email"
               type="email"
               autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value.replace(/\s/g, ""))}
               required
               className="mt-1 w-full rounded-lg border bg-background/70 px-3 py-2 text-sm outline-none focus:border-primary"
             />
@@ -137,7 +156,10 @@ function AuthPage() {
             </label>
             <input
               id="senha"
-              type="password"
+              type={showPassword ? "text" : "password"}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               autoComplete={mode === "entrar" ? "current-password" : "new-password"}
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
@@ -146,6 +168,23 @@ function AuthPage() {
               className="mt-1 w-full rounded-lg border bg-background/70 px-3 py-2 text-sm outline-none focus:border-primary"
             />
           </div>
+          <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={(event) => setShowPassword(event.target.checked)}
+              className="size-4 accent-primary"
+            />
+            Mostrar senha
+          </label>
+          {loginError && (
+            <div
+              role="alert"
+              className="rounded-md border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-800"
+            >
+              {loginError}
+            </div>
+          )}
           <button
             type="submit"
             disabled={busy}
@@ -157,7 +196,10 @@ function AuthPage() {
 
         <button
           type="button"
-          onClick={() => setMode(mode === "entrar" ? "criar" : "entrar")}
+          onClick={() => {
+            setLoginError(null);
+            setMode(mode === "entrar" ? "criar" : "entrar");
+          }}
           className="mt-4 w-full text-center text-xs font-semibold text-primary"
         >
           {mode === "entrar" ? "Primeiro acesso? Criar cadastro" : "Já tenho acesso — entrar"}
