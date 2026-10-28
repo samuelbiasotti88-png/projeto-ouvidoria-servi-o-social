@@ -4,14 +4,15 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useNavigate,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -39,9 +40,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
@@ -95,7 +93,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
@@ -127,9 +125,57 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        <AuthGate>
+          <Outlet />
+        </AuthGate>
         <Toaster position="top-right" richColors />
       </AuthProvider>
     </QueryClientProvider>
   );
+}
+
+function AuthGate({ children }: { children: ReactNode }) {
+  const { session, loading, accessError, signOut } = useAuth();
+  const path = useRouterState({ select: (state) => state.location.pathname });
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (path !== "/auth" && !loading && !session) void navigate({ to: "/auth" });
+  }, [path, loading, session, navigate]);
+  if (path === "/auth") return children;
+  if (loading)
+    return (
+      <div
+        role="status"
+        className="grid min-h-dvh place-items-center text-sm text-muted-foreground"
+      >
+        Carregando seu perfil de acesso…
+      </div>
+    );
+  if (!session) return null;
+  if (accessError)
+    return (
+      <main className="grid min-h-dvh place-items-center p-6">
+        <section role="alert" className="glass-panel max-w-md p-6">
+          <h1 className="text-lg font-semibold">Acesso não carregado</h1>
+          <p className="mt-3 text-sm text-muted-foreground">{accessError}</p>
+          <div className="mt-5 flex gap-3">
+            <button
+              type="button"
+              className="rounded-md bg-primary px-4 py-2 text-sm text-white"
+              onClick={() => window.location.reload()}
+            >
+              Tentar novamente
+            </button>
+            <button
+              type="button"
+              className="rounded-md border px-4 py-2 text-sm"
+              onClick={() => void signOut()}
+            >
+              Sair
+            </button>
+          </div>
+        </section>
+      </main>
+    );
+  return children;
 }

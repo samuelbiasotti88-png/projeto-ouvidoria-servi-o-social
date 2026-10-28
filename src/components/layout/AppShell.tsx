@@ -2,54 +2,49 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Activity,
   BarChart3,
-  Bell,
   CalendarDays,
   ClipboardList,
   FileText,
-  Gauge,
   HeartPulse,
   Home,
   LogOut,
+  Menu,
   Search,
-  ShieldCheck,
   Truck,
   Users,
   Wrench,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-
 import { useAuth } from "@/hooks/useAuth";
 import { initials, roleLabels } from "@/lib/domain";
 import { cn } from "@/lib/utils";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
 const navGroups = [
   {
+    label: "Atendimento",
+    items: [
+      { to: "/", label: "Visão geral", icon: Home },
+      { to: "/pacientes", label: "Pacientes", icon: Users },
+      { to: "/agenda", label: "Agenda de serviços", icon: CalendarDays },
+    ],
+  },
+  {
     label: "Operação",
     items: [
-      { to: "/", label: "Painel", icon: Home },
-      { to: "/pacientes", label: "Pacientes", icon: Users },
       { to: "/implantacoes", label: "Implantações", icon: HeartPulse },
       { to: "/recargas", label: "Recargas", icon: Activity },
       { to: "/retiradas", label: "Retiradas", icon: Truck },
+      { to: "/equipamentos", label: "Equipamentos", icon: Wrench },
     ],
   },
   {
-    label: "Organização",
+    label: "Controle",
     items: [
-      { to: "/agenda", label: "Agenda", icon: CalendarDays },
-      { to: "/equipamentos", label: "Equipamentos", icon: Wrench },
       { to: "/documentos", label: "Notas e documentos", icon: FileText },
       { to: "/pendencias", label: "Pendências", icon: ClipboardList },
-    ],
-  },
-  {
-    label: "Gestão",
-    items: [
-      { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
-      { to: "/indicadores", label: "Indicadores", icon: Gauge },
-      { to: "/auditoria", label: "Auditoria", icon: ShieldCheck },
-      { to: "/usuarios", label: "Usuários", icon: Bell },
+      { to: "/indicadores", label: "Indicadores", icon: BarChart3 },
     ],
   },
 ] as const;
@@ -58,38 +53,41 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { session, loading, nome, roles, signOut } = useAuth();
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-
   useEffect(() => {
-    if (!loading && !session) {
-      void navigate({ to: "/auth" });
-    }
+    if (!loading && !session) void navigate({ to: "/auth" });
   }, [loading, session, navigate]);
-
-  if (loading || !session) {
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+  if (loading || !session)
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">Carregando o sistema…</p>
+      <div
+        role="status"
+        className="grid min-h-dvh place-items-center text-sm text-muted-foreground"
+      >
+        Carregando seu ambiente de trabalho…
       </div>
     );
-  }
 
-  return (
-    <div className="mx-auto flex min-h-screen max-w-[1600px]">
-      <aside className="glass-soft sticky top-0 hidden h-screen w-64 shrink-0 flex-col gap-1 overflow-y-auto border-r px-4 py-6 md:flex">
-        <div className="mb-6 flex items-center gap-3 px-2">
-          <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-[var(--shadow-brand)]">
-            <span className="font-display text-lg font-bold">O₂</span>
+  const navigation = (
+    <>
+      <div className="border-b border-white/15 px-6 py-6">
+        <Link to="/" className="block text-white">
+          <span className="text-[11px] font-semibold tracking-[0.22em] text-blue-200 uppercase">
+            Gestão domiciliar
+          </span>
+          <div className="mt-1 text-2xl font-bold tracking-tight">
+            Vital Air<span className="text-emerald-300">.</span>
           </div>
-          <div className="leading-tight">
-            <p className="font-display text-sm font-bold">Oxigenoterapia</p>
-            <p className="text-[11px] text-muted-foreground">Saúde · Botucatu-SP</p>
-          </div>
-        </div>
-
+        </Link>
+        <p className="mt-2 text-xs leading-5 text-blue-200">Oxigenoterapia · Botucatu</p>
+      </div>
+      <nav aria-label="Menu principal" className="flex-1 space-y-5 overflow-y-auto px-3 py-5">
         {navGroups.map((group) => (
           <div key={group.label}>
-            <p className="px-2 pt-3 pb-1 text-[10px] font-semibold tracking-[0.15em] text-muted-foreground uppercase">
+            <p className="mb-2 px-3 text-[10px] font-semibold tracking-[0.16em] text-blue-200/75 uppercase">
               {group.label}
             </p>
             {group.items.map((item) => {
@@ -99,58 +97,104 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.to}
                   to={item.to}
+                  aria-current={active ? "page" : undefined}
+                  onClick={() => setMenuOpen(false)}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
+                    "mb-1 flex min-h-11 items-center gap-3 rounded-md px-3 text-[13px] font-medium transition-colors",
                     active
-                      ? "bg-sidebar-accent text-primary font-semibold shadow-sm"
-                      : "text-muted-foreground hover:bg-sidebar-accent/60",
+                      ? "bg-white text-[#173a63]"
+                      : "text-blue-100 hover:bg-white/10 hover:text-white",
                   )}
                 >
-                  <Icon className="size-4 shrink-0" aria-hidden />
+                  <Icon className="size-[18px] shrink-0" aria-hidden />
                   {item.label}
                 </Link>
               );
             })}
           </div>
         ))}
-
-        <div className="glass-soft mt-auto rounded-xl p-3">
-          <div className="flex items-center gap-2">
-            <div className="grid size-9 shrink-0 place-items-center rounded-full bg-accent/25 text-xs font-bold text-accent-foreground">
-              {initials(nome)}
-            </div>
-            <div className="min-w-0 leading-tight">
-              <p className="truncate text-xs font-semibold">{nome || "Usuário"}</p>
-              <p className="text-[10px] text-muted-foreground">
-                {roles.map((r) => roleLabels[r]).join(", ") || "Sem perfil"}
-              </p>
-            </div>
+      </nav>
+      <div className="border-t border-white/15 p-4">
+        <div className="flex items-center gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/15 text-xs font-bold text-white">
+            {initials(nome)}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold text-white">{nome || "Usuário"}</p>
+            <p className="mt-1 text-[11px] text-blue-200">
+              {roles.map((r) => roleLabels[r]).join(", ") || "Carregando perfil"}
+            </p>
           </div>
           <button
             type="button"
+            title="Sair do sistema"
+            aria-label="Sair do sistema"
             onClick={() => void signOut()}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-sidebar-accent"
+            className="ml-auto rounded-md p-2 text-blue-100 hover:bg-white/10"
           >
-            <LogOut className="size-3.5" aria-hidden /> Sair
+            <LogOut className="size-4" />
           </button>
         </div>
-      </aside>
-
-      <div className="min-w-0 flex-1 px-4 py-6 lg:px-8">
-        <div className="mb-4 flex items-center gap-3 md:hidden">
-          <span className="font-display text-sm font-bold">Oxigenoterapia · Botucatu-SP</span>
+        <div className="municipal-logo mt-3">
+          <img src="/saude-botucatu.png" alt="Secretaria de Saúde e Prefeitura de Botucatu" />
         </div>
-        <button
-          type="button"
-          onClick={() => setSearchOpen(true)}
-          className="glass-soft mb-6 flex w-full max-w-md items-center gap-2 rounded-full px-4 py-2 text-sm text-muted-foreground"
-        >
-          <Search className="size-4" aria-hidden />
-          Buscar paciente, CPF, equipamento ou nota…
-        </button>
-        <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
-        {children}
       </div>
+    </>
+  );
+  return (
+    <div className="app-workspace min-h-dvh">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col bg-[#123355] lg:flex">
+        {navigation}
+      </aside>
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent
+          side="left"
+          className="flex w-[280px] flex-col gap-0 border-0 bg-[#123355] p-0 text-white"
+        >
+          <SheetTitle className="sr-only">Menu do sistema</SheetTitle>
+          <SheetDescription className="sr-only">
+            Navegação entre as áreas da Vital Air.
+          </SheetDescription>
+          {navigation}
+        </SheetContent>
+      </Sheet>
+      <div className="min-w-0 lg:pl-[248px]">
+        <header className="sticky top-0 z-20 flex min-h-[72px] items-center gap-3 border-b bg-white px-4 sm:px-6 lg:px-8">
+          <button
+            type="button"
+            aria-label="Abrir menu"
+            onClick={() => setMenuOpen(true)}
+            className="rounded-md border p-2 text-foreground lg:hidden"
+          >
+            <Menu className="size-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-md border bg-background px-3 text-left text-[13px] text-muted-foreground sm:max-w-md"
+          >
+            <Search className="size-4 shrink-0" />
+            <span className="truncate">Buscar paciente, CPF ou documento</span>
+          </button>
+          <div className="ml-auto hidden text-right sm:block">
+            <p className="text-xs font-semibold text-foreground">Secretaria Municipal de Saúde</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">Botucatu · São Paulo</p>
+          </div>
+          <span className="rounded border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-800">
+            Homologação
+          </span>
+        </header>
+        <main id="conteudo" className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          {children}
+        </main>
+        <footer className="mx-4 border-t py-5 text-[11px] text-muted-foreground sm:mx-6 lg:mx-8">
+          Vital Air · Gestão de oxigenoterapia domiciliar{" "}
+          <span className="float-right hidden sm:inline">
+            Secretaria Municipal de Saúde de Botucatu
+          </span>
+        </footer>
+      </div>
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }
