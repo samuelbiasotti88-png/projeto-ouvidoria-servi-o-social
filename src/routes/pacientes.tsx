@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/pacientes")({
       },
     ],
   }),
-  component: PacientesPage,
+  component: PacientesRoute,
 });
 
 type NovoPaciente = {
@@ -78,6 +78,11 @@ const vazio: NovoPaciente = {
   data_solicitacao: todayISO(),
   observacoes: "",
 };
+
+function PacientesRoute() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  return pathname.replace(/\/$/, "") === "/pacientes" ? <PacientesPage /> : <Outlet />;
+}
 
 function PacientesPage() {
   const { podeEditar } = useAuth();
@@ -123,7 +128,8 @@ function PacientesPage() {
     if (bairroFilter !== "todos" && p.bairro !== bairroFilter) return false;
     if (term.trim()) {
       const t = term.trim().toLowerCase();
-      const hay = `${p.nome} ${p.cpf ?? ""} ${p.cartao_sus ?? ""} ${p.telefone ?? ""} ${p.numero_equipamento ?? ""} ${p.bairro ?? ""} ${p.logradouro ?? ""}`.toLowerCase();
+      const hay =
+        `${p.nome} ${p.cpf ?? ""} ${p.cartao_sus ?? ""} ${p.telefone ?? ""} ${p.numero_equipamento ?? ""} ${p.bairro ?? ""} ${p.logradouro ?? ""}`.toLowerCase();
       if (!hay.includes(t)) return false;
     }
     return true;
@@ -275,7 +281,9 @@ function PacientesPage() {
                     {p.numero_equipamento ? ` · ${p.numero_equipamento}` : ""}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{p.bairro ?? "—"}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{formatDate(p.ultima_recarga)}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {formatDate(p.ultima_recarga)}
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {formatDate(p.proxima_recarga)}
                   </td>
@@ -332,11 +340,17 @@ function PacientesPage() {
                 required
                 className="sm:col-span-2"
               />
-              <Campo label="CPF" value={form.cpf} onChange={(v) => setForm({ ...form, cpf: maskCPF(v) })} />
+              <Campo
+                label="CPF"
+                value={form.cpf}
+                onChange={(v) => setForm({ ...form, cpf: maskCPF(v) })}
+              />
               <Campo
                 label="Cartão SUS"
                 value={form.cartao_sus}
-                onChange={(v) => setForm({ ...form, cartao_sus: v.replace(/\D/g, "").slice(0, 15) })}
+                onChange={(v) =>
+                  setForm({ ...form, cartao_sus: v.replace(/\D/g, "").slice(0, 15) })
+                }
               />
               <Campo
                 label="Data de nascimento"
@@ -359,14 +373,26 @@ function PacientesPage() {
                 value={form.parentesco}
                 onChange={(v) => setForm({ ...form, parentesco: v })}
               />
-              <Campo label="CEP" value={form.cep} onChange={(v) => setForm({ ...form, cep: maskCEP(v) })} />
+              <Campo
+                label="CEP"
+                value={form.cep}
+                onChange={(v) => setForm({ ...form, cep: maskCEP(v) })}
+              />
               <Campo
                 label="Logradouro"
                 value={form.logradouro}
                 onChange={(v) => setForm({ ...form, logradouro: v })}
               />
-              <Campo label="Número" value={form.numero} onChange={(v) => setForm({ ...form, numero: v })} />
-              <Campo label="Bairro" value={form.bairro} onChange={(v) => setForm({ ...form, bairro: v })} />
+              <Campo
+                label="Número"
+                value={form.numero}
+                onChange={(v) => setForm({ ...form, numero: v })}
+              />
+              <Campo
+                label="Bairro"
+                value={form.bairro}
+                onChange={(v) => setForm({ ...form, bairro: v })}
+              />
               <Campo
                 label="Tipo de equipamento"
                 value={form.tipo_equipamento}

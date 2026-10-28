@@ -15,6 +15,8 @@ import {
   patientStatusTone,
   serviceStatusLabels,
   serviceStatusTone,
+  todayISO,
+  downloadCSV,
 } from "@/lib/domain";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +41,7 @@ export const Route = createFileRoute("/pacientes/$id")({
 
 const abas = [
   "Resumo",
+  "Acompanhamento mensal",
   "Dados pessoais",
   "Oxigenoterapia",
   "Recargas",
@@ -54,17 +57,32 @@ function PacienteDetalhe() {
   const { id } = Route.useParams();
   const [aba, setAba] = useState<(typeof abas)[number]>("Resumo");
   const { podeAuditar } = useAuth();
+  const [mes, setMes] = useState(todayISO().slice(0, 7));
 
-  const { data: paciente } = useQuery({
+  const {
+    data: paciente,
+    isPending,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["paciente", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("patients").select("*").eq("id", id).maybeSingle();
+      const { data, error } = await supabase
+        .from("patients")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
   });
 
-  const { data: recargas = [] } = useQuery({
+  const {
+    data: recargas = [],
+    isPending: recargasPending,
+    isError: recargasError,
+    refetch: recargasRefetch,
+  } = useQuery({
     queryKey: ["paciente-recargas", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -77,16 +95,29 @@ function PacienteDetalhe() {
     },
   });
 
-  const { data: implantacoes = [] } = useQuery({
+  const {
+    data: implantacoes = [],
+    isPending: implantacoesPending,
+    isError: implantacoesError,
+    refetch: implantacoesRefetch,
+  } = useQuery({
     queryKey: ["paciente-implantacoes", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("installations").select("*").eq("paciente_id", id);
+      const { data, error } = await supabase
+        .from("installations")
+        .select("*")
+        .eq("paciente_id", id);
       if (error) throw error;
       return data;
     },
   });
 
-  const { data: retiradas = [] } = useQuery({
+  const {
+    data: retiradas = [],
+    isPending: retiradasPending,
+    isError: retiradasError,
+    refetch: retiradasRefetch,
+  } = useQuery({
     queryKey: ["paciente-retiradas", id],
     queryFn: async () => {
       const { data, error } = await supabase.from("removals").select("*").eq("paciente_id", id);
@@ -95,7 +126,12 @@ function PacienteDetalhe() {
     },
   });
 
-  const { data: documentos = [] } = useQuery({
+  const {
+    data: documentos = [],
+    isPending: documentosPending,
+    isError: documentosError,
+    refetch: documentosRefetch,
+  } = useQuery({
     queryKey: ["paciente-documentos", id],
     queryFn: async () => {
       const { data, error } = await supabase.from("documents").select("*").eq("paciente_id", id);
@@ -141,13 +177,85 @@ function PacienteDetalhe() {
     },
   });
 
-  if (!paciente) {
+  if (isPending || isError || !paciente) {
     return (
       <AppShell>
-        <p className="text-sm text-muted-foreground">Carregando ficha do paciente…</p>
+        {isPending ? (
+          <p role="status">Carregando ficha do paciente…</p>
+        ) : (
+          <section className="glass-panel p-6" role={isError ? "alert" : undefined}>
+            <h1 className="text-lg font-bold">
+              {isError ? "Não foi possível carregar a ficha" : "Paciente não encontrado"}
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {isError
+                ? "Confira sua conexão e tente novamente."
+                : "O registro pode ter sido removido ou seu perfil pode não ter acesso."}
+            </p>
+            {isError && (
+              <button className="mt-4 rounded border px-4 py-2" onClick={() => void refetch()}>
+                Tentar novamente
+              </button>
+            )}
+            <Link to="/pacientes" className="ml-4 text-sm text-primary">
+              Voltar aos pacientes
+            </Link>
+          </section>
+        )}
       </AppShell>
     );
   }
+
+  const mensalPendente =
+    recargasPending || implantacoesPending || retiradasPending || documentosPending;
+  const mensalErro = recargasError || implantacoesError || retiradasError || documentosError;
+  const eventos = [
+    ...recargas.map((r) => ({
+      id: r.id,
+      tipo: "Recarga",
+      data: r.data_realizada ?? r.data_agendada ?? r.data_prevista ?? r.data_solicitacao,
+      situacao: serviceStatusLabels[r.status],
+      detalhe: r.numero_nota ? `Nota ${r.numero_nota}` : (r.observacoes ?? "—"),
+    })),
+    ...implantacoes.map((r) => ({
+      id: r.id,
+      tipo: "Implantação",
+      data: r.data_realizada ?? r.data_agendada ?? r.data_prevista ?? r.data_solicitacao,
+      situacao: serviceStatusLabels[r.status],
+      detalhe: r.numero_equipamento ?? "—",
+    })),
+    ...retiradas.map((r) => ({
+      id: r.id,
+      tipo: "Retirada",
+      data: r.data_realizada ?? r.data_agendada ?? r.data_prevista ?? r.data_solicitacao,
+      situacao: serviceStatusLabels[r.status],
+      detalhe: r.motivo ?? "—",
+    })),
+    ...documentos.map((d) => ({
+      id: d.id,
+      tipo: d.tipo === "nota_fiscal" ? "Nota fiscal" : "Documento",
+      data: d.data,
+      situacao: d.divergencia
+        ? "Divergência"
+        : d.conferido
+          ? "Conferido"
+          : "Aguardando conferência",
+      detalhe: `${d.numero ?? "Sem número"} · ${formatCurrency(d.valor)}`,
+    })),
+  ]
+    .filter((e) => e.data?.slice(0, 7) === mes)
+    .sort((a, b) => (a.data ?? "").localeCompare(b.data ?? ""));
+  const exportarMes = () =>
+    downloadCSV(
+      `acompanhamento-${mes}.csv`,
+      eventos.map((e) => ({
+        Data: formatDate(e.data),
+        Paciente: paciente.nome,
+        Tipo: e.tipo,
+        Situação: e.situacao,
+        Detalhes: e.detalhe,
+      })),
+    );
 
   return (
     <AppShell>
@@ -202,6 +310,107 @@ function PacienteDetalhe() {
       </section>
 
       <section className="glass-panel mt-4 p-5">
+        {aba === "Acompanhamento mensal" && (
+          <div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <h2 className="font-bold">Acompanhamento mensal</h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Serviços pela data realizada; se pendentes, pela data agendada, prevista ou
+                  solicitada. Documentos pela data de emissão.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-end gap-3">
+                <label className="text-sm">
+                  Mês de referência
+                  <input
+                    aria-label="Mês de referência"
+                    type="month"
+                    value={mes}
+                    onChange={(e) => {
+                      if (/^\d{4}-\d{2}$/.test(e.target.value)) setMes(e.target.value);
+                    }}
+                    className="mt-1 block rounded border bg-background px-3 py-2"
+                  />
+                </label>
+                <button
+                  disabled={mensalPendente || mensalErro || !eventos.length}
+                  onClick={exportarMes}
+                  className="rounded border px-3 py-2 text-sm disabled:opacity-50"
+                >
+                  Exportar CSV
+                </button>
+              </div>
+            </div>
+            {mensalPendente ? (
+              <p role="status" className="mt-6">
+                Carregando registros do mês…
+              </p>
+            ) : mensalErro ? (
+              <div role="alert" className="mt-6 rounded border border-red-200 bg-red-50 p-4">
+                <p>
+                  Não foi possível consultar todos os registros. O relatório está indisponível para
+                  evitar informações incompletas.
+                </p>
+                <button
+                  className="mt-3 underline"
+                  onClick={() => {
+                    void recargasRefetch();
+                    void implantacoesRefetch();
+                    void retiradasRefetch();
+                    void documentosRefetch();
+                  }}
+                >
+                  Tentar novamente
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="my-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  {["Recarga", "Implantação", "Retirada", "Nota fiscal"].map((tipo) => (
+                    <div key={tipo} className="rounded border p-3">
+                      <p className="text-xs text-muted-foreground">{tipo}</p>
+                      <p className="mt-1 text-2xl font-bold">
+                        {eventos.filter((e) => e.tipo === tipo).length}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                {!eventos.length ? (
+                  <p className="rounded border border-dashed p-6 text-sm text-muted-foreground">
+                    Nenhum serviço ou documento com data neste mês.
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <caption className="sr-only">Registros mensais de {paciente.nome}</caption>
+                      <thead>
+                        <tr className="border-b">
+                          {["Data", "Tipo", "Situação", "Detalhes"].map((h) => (
+                            <th scope="col" key={h} className="px-3 py-3">
+                              {h}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {eventos.map((e) => (
+                          <tr key={`${e.tipo}-${e.id}`} className="border-b">
+                            <td className="whitespace-nowrap px-3 py-3">{formatDate(e.data)}</td>
+                            <td className="px-3 py-3">{e.tipo}</td>
+                            <td className="px-3 py-3">{e.situacao}</td>
+                            <td className="min-w-40 break-words px-3 py-3">{e.detalhe}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
         {aba === "Resumo" ? (
           <div className="grid gap-4 md:grid-cols-2">
             <Bloco titulo="Situação atual">
@@ -248,7 +457,10 @@ function PacienteDetalhe() {
               />
               <Linha rotulo="Complemento" valor={paciente.complemento ?? "—"} />
               <Linha rotulo="Bairro" valor={paciente.bairro ?? "—"} />
-              <Linha rotulo="Cidade/UF" valor={`${paciente.cidade ?? "—"}/${paciente.estado ?? "—"}`} />
+              <Linha
+                rotulo="Cidade/UF"
+                valor={`${paciente.cidade ?? "—"}/${paciente.estado ?? "—"}`}
+              />
               <Linha rotulo="Referência" valor={paciente.referencia ?? "—"} />
             </Bloco>
           </div>
@@ -259,8 +471,14 @@ function PacienteDetalhe() {
             <Linha rotulo="Tipo de equipamento" valor={paciente.tipo_equipamento ?? "—"} />
             <Linha rotulo="Número do equipamento" valor={paciente.numero_equipamento ?? "—"} />
             <Linha rotulo="Tipo de oxigênio" valor={paciente.tipo_oxigenio ?? "—"} />
-            <Linha rotulo="Prevista para implantação" valor={formatDate(paciente.data_prevista_implantacao)} />
-            <Linha rotulo="Prevista para retirada" valor={formatDate(paciente.data_prevista_retirada)} />
+            <Linha
+              rotulo="Prevista para implantação"
+              valor={formatDate(paciente.data_prevista_implantacao)}
+            />
+            <Linha
+              rotulo="Prevista para retirada"
+              valor={formatDate(paciente.data_prevista_retirada)}
+            />
             <Linha rotulo="Retirada efetiva" valor={formatDate(paciente.data_retirada)} />
             <Linha rotulo="Observações" valor={paciente.observacoes ?? "—"} />
           </Bloco>
@@ -317,17 +535,27 @@ function PacienteDetalhe() {
         {aba === "Documentos" ? (
           <div className="space-y-2">
             {documentos.map((d) => (
-              <div key={d.id} className="glass-soft flex flex-wrap items-center gap-3 rounded-xl px-4 py-3">
+              <div
+                key={d.id}
+                className="glass-soft flex flex-wrap items-center gap-3 rounded-xl px-4 py-3"
+              >
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold">
-                    {d.tipo === "nota_fiscal" ? "Nota fiscal" : "Ordem de serviço"} {d.numero ?? "—"}
+                    {d.tipo === "nota_fiscal" ? "Nota fiscal" : "Ordem de serviço"}{" "}
+                    {d.numero ?? "—"}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatDate(d.data)} · {formatCurrency(d.valor)} · {d.servico ?? "—"}
                   </p>
                 </div>
-                <StatusBadge tone={d.divergencia ? "critical" : d.conferido ? "success" : "warning"}>
-                  {d.divergencia ? "Divergência" : d.conferido ? "Conferido" : "Aguardando conferência"}
+                <StatusBadge
+                  tone={d.divergencia ? "critical" : d.conferido ? "success" : "warning"}
+                >
+                  {d.divergencia
+                    ? "Divergência"
+                    : d.conferido
+                      ? "Conferido"
+                      : "Aguardando conferência"}
                 </StatusBadge>
               </div>
             ))}
